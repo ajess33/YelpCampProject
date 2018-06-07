@@ -1,8 +1,9 @@
 const express = require('express'),
   mongoose = require('mongoose'),
   methodOverride = require('method-override'),
-  expressSanitizer = require('express-sanitizer');
-(bodyParser = require('body-parser')), (app = express());
+  expressSanitizer = require('express-sanitizer'),
+  bodyParser = require('body-parser'),
+  app = express();
 
 // APP CONFIG
 mongoose.connect('mongodb://localhost/restful_blog_app');
@@ -51,6 +52,7 @@ app.get('/blogs/new', (req, res) => {
 // CREATE ROUTE
 app.post('/blogs', (req, res) => {
   // create blog
+  req.body.blog.body = req.expressSanitizer(req.body.blog.body);
   Blog.create(req.body.blog, (err, newBlog) => {
     if (err) {
       res.render('new');
@@ -86,6 +88,7 @@ app.get('/blogs/:id/edit', (req, res) => {
 // UPDATE ROUTE
 // put means we are updating
 app.put('/blogs/:id', (req, res) => {
+  req.body.blog.body = req.expressSanitizer(req.body.blog.body);
   // findByIdAndUpdate(id, newData, callback)
   Blog.findByIdAndUpdate(req.params.id, req.body.blog, (err, updatedBlog) => {
     if (err) {
