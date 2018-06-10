@@ -9,6 +9,8 @@ const express = require('express'),
 mongoose.connect('mongodb://localhost/yelp_camp');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
+// __dirname is just to be safe with path
+app.use(express.static(__dirname + '/public'));
 seedDB();
 
 app.get('/', (req, res) => {
