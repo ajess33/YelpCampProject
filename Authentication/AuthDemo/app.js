@@ -21,6 +21,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+passport.use(new LocalStrategy(User.authenticate()));
 // decoding and encoding
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -37,7 +38,7 @@ app.get('/secret', (req, res) => {
   res.render('secret');
 });
 
-// Auth Routes
+// AUTH ROUTES
 
 // show sign up form
 app.get('/register', (req, res) => {
@@ -59,6 +60,23 @@ app.post('/register', (req, res) => {
     }
   );
 });
+
+// LOGIN ROUTES
+
+// render login form
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+// login logic
+// middleware
+app.post(
+  '/login',
+  passport.authenticate('local', {
+    successRedirect: '/secret',
+    failureRedirect: '/login'
+  }),
+  (req, res) => {}
+);
 
 app.listen(3000, () => {
   console.log('Server started');
