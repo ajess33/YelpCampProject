@@ -16,6 +16,20 @@ app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 seedDB();
 
+// PASSPORT CONFIGURATION
+app.use(
+  require('express-session')({
+    secret: 'Morgan is the best girlfriend in the world',
+    resave: false,
+    saveUninitialized: false
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 app.get('/', (req, res) => {
   res.render('landing');
 });
@@ -107,6 +121,28 @@ app.post('/campgrounds/:id/comments', (req, res) => {
   // create new comment
   // connect new comment to campground
   // redirect campground show page
+});
+
+// =====================
+// AUTH ROUTES
+// =====================
+
+// show register form
+app.get('/register', (req, res) => {
+  res.render('register');
+});
+// handle sign up logic
+app.post('/register', (req, res) => {
+  const newUser = new User({ username: req.body.username });
+  User.register(newUser, req.body.password, (err, user) => {
+    if (err) {
+      console.log(err);
+      return res.render('register');
+    }
+    passport.authenticate('local')(req, res, () => {
+      res.redirect('/campgrounds');
+    });
+  });
 });
 
 app.listen(3000, () => {
