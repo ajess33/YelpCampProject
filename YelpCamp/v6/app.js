@@ -16,6 +16,13 @@ app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 seedDB();
 
+// middleware function
+app.use((req, res, next) => {
+  res.locals.currentUser = req.user;
+  // move on to next callback
+  next();
+});
+
 // PASSPORT CONFIGURATION
 app.use(
   require('express-session')({
@@ -41,7 +48,10 @@ app.get('/campgrounds', (req, res) => {
     if (err) {
       console.log(err);
     } else {
-      res.render('campgrounds/index', { campgrounds: allCampgrounds });
+      res.render('campgrounds/index', {
+        campgrounds: allCampgrounds,
+        currentUser: req.user
+      });
     }
   });
 });
@@ -89,7 +99,7 @@ app.get('/campgrounds/:id', function(req, res) {
 // COMMENT ROUTES
 // ==========================
 
-app.get('/campgrounds/:id/comments/new', (req, res) => {
+app.get('/campgrounds/:id/comments/new', isLoggedIn, (req, res) => {
   // find campground by id
   Campground.findById(req.params.id, (err, campground) => {
     if (err) {
@@ -100,7 +110,7 @@ app.get('/campgrounds/:id/comments/new', (req, res) => {
   });
 });
 
-app.post('/campgrounds/:id/comments', (req, res) => {
+app.post('/campgrounds/:id/comments', isLoggedIn, (req, res) => {
   // lookup campground using ID
   Campground.findById(req.params.id, (err, campground) => {
     if (err) {
@@ -144,6 +154,33 @@ app.post('/register', (req, res) => {
     });
   });
 });
+
+// show login form
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+// handling login logic
+app.post(
+  '/login',
+  passport.authenticate('local', {
+    successRedirect: '/campgrounds',
+    failureRedirect: '/login'
+  }),
+  (req, res) => {}
+);
+
+// logout route
+app.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/campgrounds');
+});
+
+function isLoggedIn(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/login');
+}
 
 app.listen(3000, () => {
   console.log('YelpCamp server online');
