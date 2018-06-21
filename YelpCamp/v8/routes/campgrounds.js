@@ -26,8 +26,13 @@ router.post('/', isLoggedIn, (req, res) => {
   const author = {
     id: req.user._id,
     username: req.user.username
-  }
-  const newCampground = { name: name, image: image, description: desc, author: author };
+  };
+  const newCampground = {
+    name: name,
+    image: image,
+    description: desc,
+    author: author
+  };
   // Create a new campground and save to DB
   Campground.create(newCampground, (err, newlyCreated) => {
     if (err) {
@@ -58,6 +63,34 @@ router.get('/:id', function(req, res) {
         res.render('campgrounds/show', { campground: foundCampground });
       }
     });
+});
+
+// EDIT campground route
+router.get('/:id/edit', (req, res) => {
+  Campground.findById(req.params.id, (err, foundCampground) => {
+    if (err) {
+      res.redirect('/campgrounds');
+    } else {
+      res.render('campgrounds/edit', { campground: foundCampground });
+    }
+  });
+});
+
+// UPDATE campground route
+router.put('/:id', (req, res) => {
+  // find and update the correct campground
+  Campground.findByIdAndUpdate(
+    req.params.id,
+    req.body.campground,
+    (err, updatedCampground) => {
+      if (err) {
+        res.redirect('/campgrounds');
+      } else {
+        res.redirect('/campgrounds/' + req.params.id);
+      }
+    }
+  );
+  // redirect somewhere(show page)
 });
 
 // Middleware
