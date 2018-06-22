@@ -90,7 +90,17 @@ router.put('/:id', (req, res) => {
       }
     }
   );
-  // redirect somewhere(show page)
+});
+
+// DESTROY campground route
+router.delete('/:id', (req, res) => {
+  Campground.findByIdAndRemove(req.params.id, (err) => {
+    if (err) {
+      res.redirect('/campgrounds');
+    } else {
+      res.redirect('/campgrounds');
+    }
+  });
 });
 
 // Middleware
